@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>POC Locations Service – Admin UI</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="brand">
+      <div class="logo">📍</div>
+      <div>
+        <div class="title">POC Locations Service</div>
+        <div class="subtitle">Admin UI (Maps / Countries / Locations / Bulk / Geo Query)</div>
+      </div>
+    </div>
+
+    <div class="baseurl">
+      <label>API Base URL</label>
+      <input id="baseUrl" type="text" value="https://localhost:7125" />
+      <button class="btn" id="btnSaveBaseUrl">Save</button>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="btnHealth">/v1/health</button>
+      <button class="btn" id="btnDbPing">/v1/db-ping</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-tab="maps">Maps</button>
+      <button class="tab" data-tab="countries">Countries</button>
+      <button class="tab" data-tab="locations">Locations (Admin)</button>
+      <button class="tab" data-tab="query">Geo Query (Public)</button>
+      <button class="tab" data-tab="bulk">Bulk Associate</button>
+    </nav>
+
+    <section class="grid">
+      <!-- LEFT: content -->
+      <div class="panel" id="panelContent">
+
+        <!-- Maps -->
+        <section class="tabPanel" id="tab-maps">
+          <div class="panelHeader">
+            <h2>Maps</h2>
+            <div class="row">
+              <label>Status</label>
+              <select id="mapsStatus">
+                <option>ACTIVE</option>
+                <option>INACTIVE</option>
+                <option>DELETED</option>
+              </select>
+              <button class="btn primary" id="btnLoadMaps">Load</button>
+            </div>
+          </div>
+
+          <div class="split">
+            <div class="card">
+              <h3>Create Map</h3>
+              <div class="form">
+                <label>map_id</label>
+                <input id="mapCreateId" placeholder="respiratory" />
+                <label>name</label>
+                <input id="mapCreateName" placeholder="Respiratory Map" />
+                <label>description</label>
+                <input id="mapCreateDesc" placeholder="MVP respiratory locations" />
+                <button class="btn primary" id="btnCreateMap">Create</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Edit Map</h3>
+              <div class="form">
+                <label>map_id</label>
+                <input id="mapEditId" placeholder="select from table →" />
+                <label>name</label>
+                <input id="mapEditName" />
+                <label>description</label>
+                <input id="mapEditDesc" />
+                <label>status</label>
+                <select id="mapEditStatus">
+                  <option>ACTIVE</option>
+                  <option>INACTIVE</option>
+                  <option>DELETED</option>
+                </select>
+                <button class="btn" id="btnGetMap">Get</button>
+                <button class="btn primary" id="btnPatchMap">Patch</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="cardHeader">
+              <h3>Maps List</h3>
+              <div class="muted">Click a row to load into “Edit Map”.</div>
+            </div>
+            <div class="tableWrap">
+              <table class="table" id="mapsTable">
+                <thead>
+                  <tr>
+                    <th>map_id</th>
+                    <th>name</th>
+                    <th>status</th>
+                    <th>updated_at</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Countries -->
+        <section class="tabPanel hidden" id="tab-countries">
+          <div class="panelHeader">
+            <h2>Countries</h2>
+            <div class="row">
+              <label>Status</label>
+              <select id="countriesStatus">
+                <option>ACTIVE</option>
+                <option>INACTIVE</option>
+                <option>DELETED</option>
+              </select>
+              <button class="btn primary" id="btnLoadCountries">Load</button>
+            </div>
+          </div>
+
+          <div class="split">
+            <div class="card">
+              <h3>Create Country</h3>
+              <div class="form">
+                <label>country_id</label>
+                <input id="countryCreateId" placeholder="AR" />
+                <label>name</label>
+                <input id="countryCreateName" placeholder="Argentina" />
+                <button class="btn primary" id="btnCreateCountry">Create</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Edit Country</h3>
+              <div class="form">
+                <label>country_id</label>
+                <input id="countryEditId" placeholder="select from table →" />
+                <label>name</label>
+                <input id="countryEditName" />
+                <label>status</label>
+                <select id="countryEditStatus">
+                  <option>ACTIVE</option>
+                  <option>INACTIVE</option>
+                  <option>DELETED</option>
+                </select>
+                <button class="btn" id="btnGetCountry">Get</button>
+                <button class="btn primary" id="btnPatchCountry">Patch</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="cardHeader">
+              <h3>Countries List</h3>
+              <div class="muted">Click a row to load into “Edit Country”.</div>
+            </div>
+            <div class="tableWrap">
+              <table class="table" id="countriesTable">
+                <thead>
+                  <tr>
+                    <th>country_id</th>
+                    <th>name</th>
+                    <th>status</th>
+                    <th>updated_at</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Locations -->
+        <section class="tabPanel hidden" id="tab-locations">
+          <div class="panelHeader">
+            <h2>Locations (Admin)</h2>
+            <div class="row">
+              <button class="btn primary" id="btnLoadLocations">Load</button>
+              <button class="btn" id="btnLoadLocationIds">Get IDs</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>List filters</h3>
+            <div class="form grid2">
+              <div>
+                <label>status</label>
+                <select id="locStatus">
+                  <option>ACTIVE</option>
+                  <option>INACTIVE</option>
+                  <option>DELETED</option>
+                </select>
+              </div>
+              <div>
+                <label>map_id (optional)</label>
+                <input id="locMapId" placeholder="respiratory" />
+              </div>
+              <div>
+                <label>country_id (optional)</label>
+                <input id="locCountryId" placeholder="AR" />
+              </div>
+              <div>
+                <label>updated_since (optional, ISO)</label>
+                <input id="locUpdatedSince" placeholder="2026-02-01T00:00:00Z" />
+              </div>
+              <div>
+                <label>limit</label>
+                <input id="locLimit" type="number" value="50" />
+              </div>
+              <div>
+                <label>offset</label>
+                <input id="locOffset" type="number" value="0" />
+              </div>
+            </div>
+          </div>
+
+          <div class="split">
+            <div class="card">
+              <h3>Create Location</h3>
+              <div class="form">
+                <label>external_reference</label>
+                <input id="locCreateExt" placeholder="AR-999" />
+                <label>name</label>
+                <input id="locCreateName" placeholder="Centro 1" />
+                <label>address_line1</label>
+                <input id="locCreateAddr1" placeholder="Av Siempre Viva 742" />
+                <label>address_line2</label>
+                <input id="locCreateAddr2" placeholder="(optional)" />
+                <label>city</label>
+                <input id="locCreateCity" placeholder="Buenos Aires" />
+                <label>region</label>
+                <input id="locCreateRegion" placeholder="CABA" />
+                <label>postal_code</label>
+                <input id="locCreatePostal" placeholder="C1000" />
+
+                <div class="row">
+                  <div>
+                    <label>latitude</label>
+                    <input id="locCreateLat" placeholder="-34.6037" />
+                  </div>
+                  <div>
+                    <label>longitude</label>
+                    <input id="locCreateLng" placeholder="-58.3816" />
+                  </div>
+                </div>
+
+                <label>phone</label>
+                <input id="locCreatePhone" placeholder="+54 11 ..." />
+                <label>email</label>
+                <input id="locCreateEmail" placeholder="contact@example.com" />
+                <label>website_url</label>
+                <input id="locCreateUrl" placeholder="https://example.com" />
+                <label>hours_text</label>
+                <input id="locCreateHours" placeholder="Mon-Fri 09:00-17:00" />
+
+                <label>countries (comma separated)</label>
+                <input id="locCreateCountries" placeholder="AR,BR" />
+                <label>maps (comma separated)</label>
+                <input id="locCreateMaps" placeholder="respiratory,covid" />
+
+                <button class="btn primary" id="btnCreateLocation">Create</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Get / Patch Location</h3>
+              <div class="form">
+                <label>location_id (GUID)</label>
+                <input id="locEditId" placeholder="paste id…" />
+                <button class="btn" id="btnGetLocation">Get</button>
+
+                <div class="divider"></div>
+
+                <label>status</label>
+                <select id="locEditStatus">
+                  <option value="">(no change)</option>
+                  <option>ACTIVE</option>
+                  <option>INACTIVE</option>
+                  <option>DELETED</option>
+                </select>
+                <label>name</label>
+                <input id="locEditName" placeholder="(no change)" />
+                <label>address_line1</label>
+                <input id="locEditAddr1" placeholder="(no change)" />
+                <label>city</label>
+                <input id="locEditCity" placeholder="(no change)" />
+                <label>region</label>
+                <input id="locEditRegion" placeholder="(no change)" />
+                <label>postal_code</label>
+                <input id="locEditPostal" placeholder="(no change)" />
+
+                <div class="row">
+                  <div>
+                    <label>latitude</label>
+                    <input id="locEditLat" placeholder="(no change)" />
+                  </div>
+                  <div>
+                    <label>longitude</label>
+                    <input id="locEditLng" placeholder="(no change)" />
+                  </div>
+                </div>
+
+                <button class="btn primary" id="btnPatchLocation">Patch</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="cardHeader">
+              <h3>Locations List</h3>
+              <div class="muted">Click a row to copy `location_id` into the patch form.</div>
+            </div>
+            <div class="tableWrap">
+              <table class="table" id="locationsTable">
+                <thead>
+                  <tr>
+                    <th>location_id</th>
+                    <th>external_reference</th>
+                    <th>name</th>
+                    <th>city</th>
+                    <th>region</th>
+                    <th>lat</th>
+                    <th>lng</th>
+                    <th>status</th>
+                    <th>updated_at</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+
+            <div class="inline">
+              <div class="muted">Location IDs (last fetch)</div>
+              <textarea id="locIdsBox" rows="3" placeholder="IDs will appear here…"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- Public Query -->
+        <section class="tabPanel hidden" id="tab-query">
+          <div class="panelHeader">
+            <h2>Geo Query (Public)</h2>
+            <div class="row">
+              <button class="btn primary" id="btnRunQuery">Run Query</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Filters</h3>
+            <div class="form grid2">
+              <div>
+                <label>map_id (optional)</label>
+                <input id="qMapId" placeholder="respiratory" />
+              </div>
+              <div>
+                <label>country_id (optional)</label>
+                <input id="qCountryId" placeholder="AR" />
+              </div>
+
+              <div class="full">
+                <label>Mode</label>
+                <div class="row">
+                  <label class="radio"><input type="radio" name="qmode" value="bbox" checked> bbox</label>
+                  <label class="radio"><input type="radio" name="qmode" value="radius"> radius</label>
+                </div>
+              </div>
+
+              <div class="full">
+                <label>bbox (minLng,minLat,maxLng,maxLat)</label>
+                <input id="qBbox" placeholder="-58.52,-34.69,-58.32,-34.54" />
+              </div>
+
+              <div>
+                <label>lat</label>
+                <input id="qLat" placeholder="-34.6037" />
+              </div>
+              <div>
+                <label>lng</label>
+                <input id="qLng" placeholder="-58.3816" />
+              </div>
+              <div>
+                <label>radius_km</label>
+                <input id="qRadius" placeholder="5" />
+              </div>
+              <div>
+                <label>limit</label>
+                <input id="qLimit" type="number" value="100" />
+              </div>
+              <div>
+                <label>offset</label>
+                <input id="qOffset" type="number" value="0" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="cardHeader">
+              <h3>Query Results</h3>
+              <div class="muted">Click a row to open the coordinates in Google Maps.</div>
+            </div>
+            <div class="tableWrap">
+              <table class="table" id="queryTable">
+                <thead>
+                  <tr>
+                    <th>location_id</th>
+                    <th>name</th>
+                    <th>city</th>
+                    <th>region</th>
+                    <th>lat</th>
+                    <th>lng</th>
+                    <th>maps</th>
+                    <th>countries</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Bulk -->
+        <section class="tabPanel hidden" id="tab-bulk">
+          <div class="panelHeader">
+            <h2>Bulk Associate</h2>
+            <div class="row">
+              <button class="btn" id="btnBulkHelp">Show examples</button>
+              <button class="btn primary" id="btnRunBulk">Run</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Target</h3>
+            <div class="form grid2">
+              <div>
+                <label>Type</label>
+                <select id="bulkType">
+                  <option value="maps">map</option>
+                  <option value="countries">country</option>
+                </select>
+              </div>
+              <div>
+                <label>ID (map_id or country_id)</label>
+                <input id="bulkTargetId" placeholder="respiratory / AR" />
+              </div>
+              <div>
+                <label>Mode</label>
+                <select id="bulkMode">
+                  <option>MERGE</option>
+                  <option>REPLACE</option>
+                </select>
+              </div>
+              <div>
+                <label>Default status</label>
+                <select id="bulkDefaultStatus">
+                  <option>ACTIVE</option>
+                  <option>INACTIVE</option>
+                  <option>DELETED</option>
+                </select>
+              </div>
+              <div class="full">
+                <label>Items (one per line). Format: <code>{locationId}</code> or <code>{locationId},{status}</code></label>
+                <textarea id="bulkItems" rows="10" placeholder="4e39a813-6f0b-4253-8f8a-0c1063c08366,ACTIVE"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Tip</h3>
+            <div class="muted">
+              You can fetch IDs from <code>/v1/admin/locations/ids</code> in the Locations tab, then paste them here.
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT: console -->
+      <aside class="panel panelRight">
+        <div class="panelHeader">
+          <h2>Console</h2>
+          <div class="row">
+            <button class="btn" id="btnClearLog">Clear</button>
+          </div>
+        </div>
+        <pre id="log" class="log"></pre>
+      </aside>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

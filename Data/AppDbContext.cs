@@ -65,7 +65,7 @@ namespace poc_locations_service.Data
 
             modelBuilder.Entity<LocationCountry>(e =>
             {
-                e.ToTable("location_country", "dbo");
+                e.ToTable("location_country", "dbo", tb => tb.UseSqlOutputClause(false));
                 e.HasKey(x => new { x.LocationId, x.CountryId });
                 e.Property(x => x.LocationId).HasColumnName("location_id");
                 e.Property(x => x.CountryId).HasColumnName("country_id");
@@ -79,7 +79,7 @@ namespace poc_locations_service.Data
 
             modelBuilder.Entity<LocationMap>(e =>
             {
-                e.ToTable("location_map", "dbo");
+                e.ToTable("location_map", "dbo", tb => tb.UseSqlOutputClause(false));
                 e.HasKey(x => new { x.LocationId, x.MapId });
                 e.Property(x => x.LocationId).HasColumnName("location_id");
                 e.Property(x => x.MapId).HasColumnName("map_id");

@@ -18,7 +18,17 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     );
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ui", p =>
+        p.AllowAnyOrigin()
+         .AllowAnyHeader()
+         .AllowAnyMethod());
+});
+
 var app = builder.Build();
+
+app.UseCors("ui");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
