@@ -33,21 +33,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapGet("/v1/health", () => Results.Ok(new { status = "ok" }));
 app.MapGet("/v1/db-ping", async (AppDbContext db) =>
 {
-    try
-    {
-        var ok = await db.Database.CanConnectAsync();
-        return Results.Ok(new { canConnect = ok });
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem(
-            title: "DB connection failed",
-            detail: ex.ToString(),
-            statusCode: 500
-        );
-    }
+    var ok = await db.Database.CanConnectAsync();
+    return Results.Ok(new { canConnect = ok });
 });
 
 app.Run();
