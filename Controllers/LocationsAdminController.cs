@@ -11,35 +11,76 @@ namespace poc_locations_service.Controllers
     public class LocationsAdminController : Controller
     {
         private readonly AppDbContext _db;
-        public LocationsAdminController(AppDbContext db) => _db = db;
+
+        public LocationsAdminController(AppDbContext db)
+        {
+            _db = db;
+        }
 
         [HttpGet]
         public async Task<IActionResult> List(
             [FromQuery] string status = "ACTIVE",
-            [FromQuery] string? map_id = null,
             [FromQuery] string? country_id = null,
-            [FromQuery] DateTime? updated_since = null,
-            [FromQuery] int limit = 1000,
-            [FromQuery] int offset = 0)
+            [FromQuery] string? map_id = null,
+            [FromQuery] int limit = 100,
+            [FromQuery] int offset = 0,
+            [FromQuery] DateTime? updated_since = null
+        )
         {
             limit = Math.Clamp(limit, 1, 5000);
-            offset = Math.Max(offset, 0);
+            offset = Math.Max(0, offset);
 
-            var s = status.ToUpperInvariant();
-
-            var q = _db.Locations.AsNoTracking().Where(l => l.Status == s);
+            var q = _db.Locations.AsNoTracking()
+                .Where(x => x.Status == status);
 
             if (updated_since.HasValue)
-                q = q.Where(l => l.UpdatedAt >= updated_since.Value);
-
-            if (!string.IsNullOrWhiteSpace(map_id))
-                q = q.Where(l => l.LocationMaps.Any(lm => lm.MapId == map_id && lm.Status == RecordStatuses.ACTIVE));
+                q = q.Where(x => x.UpdatedAt >= updated_since.Value);
 
             if (!string.IsNullOrWhiteSpace(country_id))
-                q = q.Where(l => l.LocationCountries.Any(lc => lc.CountryId == country_id && lc.Status == RecordStatuses.ACTIVE));
+            {
+                q = q.Where(x => x.LocationCountries.Any(lc =>
+                    lc.CountryId == country_id && lc.Status == "ACTIVE"));
+            }
 
-            var items = await q.OrderBy(l => l.LocationId).Skip(offset).Take(limit).ToListAsync();
-            return Ok(new { data = items, meta = new { limit, offset, count = items.Count } });
+            if (!string.IsNullOrWhiteSpace(map_id))
+            {
+                q = q.Where(x => x.LocationMaps.Any(lm =>
+                    lm.MapId == map_id && lm.Status == "ACTIVE"));
+            }
+
+            var total = await q.CountAsync();
+
+            var data = await q
+                .OrderByDescending(x => x.UpdatedAt)
+                .Skip(offset)
+                .Take(limit)
+                .Select(x => new AdminLocationDto
+                {
+                    location_id = x.LocationId,
+                    external_reference = x.ExternalReference,
+                    name = x.Name,
+                    address_line1 = x.AddressLine1,
+                    address_line2 = x.AddressLine2,
+                    city = x.City,
+                    region = x.Region,
+                    postal_code = x.PostalCode,
+                    latitude = x.Latitude,
+                    longitude = x.Longitude,
+                    phone = x.Phone,
+                    email = x.Email,
+                    website_url = x.WebsiteUrl,
+                    hours_text = x.HoursText,
+                    status = x.Status,
+                    created_at = x.CreatedAt,
+                    updated_at = x.UpdatedAt
+                })
+                .ToListAsync();
+
+            return Ok(new
+            {
+                data,
+                paging = new { limit, offset, total }
+            });
         }
 
         [HttpGet("ids")]
