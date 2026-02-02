@@ -14,7 +14,6 @@ namespace poc_locations_service.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // --- countries ---
             modelBuilder.Entity<Country>(e =>
             {
                 e.ToTable("countries", "dbo");
@@ -26,7 +25,6 @@ namespace poc_locations_service.Data
                 e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
             });
 
-            // --- maps ---
             modelBuilder.Entity<MapEntity>(e =>
             {
                 e.ToTable("maps", "dbo");
@@ -39,7 +37,6 @@ namespace poc_locations_service.Data
                 e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
             });
 
-            // --- locations ---
             modelBuilder.Entity<Location>(e =>
             {
                 e.ToTable("locations", "dbo");
@@ -52,17 +49,13 @@ namespace poc_locations_service.Data
                 e.Property(x => x.City).HasColumnName("city");
                 e.Property(x => x.Region).HasColumnName("region");
                 e.Property(x => x.PostalCode).HasColumnName("postal_code");
-
                 e.Property(x => x.Latitude).HasColumnName("latitude");
                 e.Property(x => x.Longitude).HasColumnName("longitude");
-
                 e.Property(x => x.Geom).HasColumnName("geom").HasColumnType("geography");
-
                 e.Property(x => x.Phone).HasColumnName("phone");
                 e.Property(x => x.Email).HasColumnName("email");
                 e.Property(x => x.WebsiteUrl).HasColumnName("website_url");
                 e.Property(x => x.HoursText).HasColumnName("hours_text");
-
                 e.Property(x => x.Status).HasColumnName("status");
                 e.Property(x => x.CreatedAt).HasColumnName("created_at");
                 e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
@@ -70,46 +63,32 @@ namespace poc_locations_service.Data
                 e.Property(x => x.UpdatedBy).HasColumnName("updated_by");
             });
 
-            // --- location_country ---
             modelBuilder.Entity<LocationCountry>(e =>
             {
                 e.ToTable("location_country", "dbo");
                 e.HasKey(x => new { x.LocationId, x.CountryId });
-
                 e.Property(x => x.LocationId).HasColumnName("location_id");
                 e.Property(x => x.CountryId).HasColumnName("country_id");
                 e.Property(x => x.Status).HasColumnName("status");
                 e.Property(x => x.CreatedAt).HasColumnName("created_at");
                 e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
 
-                e.HasOne(x => x.Location)
-                    .WithMany(l => l.LocationCountries)
-                    .HasForeignKey(x => x.LocationId);
-
-                e.HasOne(x => x.Country)
-                    .WithMany(c => c.LocationCountries)
-                    .HasForeignKey(x => x.CountryId);
+                e.HasOne(x => x.Location).WithMany(l => l.LocationCountries).HasForeignKey(x => x.LocationId);
+                e.HasOne(x => x.Country).WithMany(c => c.LocationCountries).HasForeignKey(x => x.CountryId);
             });
 
-            // --- location_map ---
             modelBuilder.Entity<LocationMap>(e =>
             {
                 e.ToTable("location_map", "dbo");
                 e.HasKey(x => new { x.LocationId, x.MapId });
-
                 e.Property(x => x.LocationId).HasColumnName("location_id");
                 e.Property(x => x.MapId).HasColumnName("map_id");
                 e.Property(x => x.Status).HasColumnName("status");
                 e.Property(x => x.CreatedAt).HasColumnName("created_at");
                 e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
 
-                e.HasOne(x => x.Location)
-                    .WithMany(l => l.LocationMaps)
-                    .HasForeignKey(x => x.LocationId);
-
-                e.HasOne(x => x.Map)
-                    .WithMany(m => m.LocationMaps)
-                    .HasForeignKey(x => x.MapId);
+                e.HasOne(x => x.Location).WithMany(l => l.LocationMaps).HasForeignKey(x => x.LocationId);
+                e.HasOne(x => x.Map).WithMany(m => m.LocationMaps).HasForeignKey(x => x.MapId);
             });
         }
 
