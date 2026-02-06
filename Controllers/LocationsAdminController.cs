@@ -226,8 +226,16 @@ namespace poc_locations_service.Controllers
         [HttpPost("bulk")]
         public async Task<IActionResult> BulkCreate([FromBody] BulkCreateLocationsRequest req)
         {
+            if (req.Locations == null || req.Locations.Count == 0)
+            {
+                return BadRequest(new { error = "Locations list cannot be empty" });
+            }
+
             var createdIds = new List<Guid>();
             var now = DateTime.UtcNow;
+            var locations = new List<Location>();
+            var locationCountries = new List<LocationCountry>();
+            var locationMaps = new List<LocationMap>();
 
             foreach (var locReq in req.Locations)
             {
@@ -253,13 +261,13 @@ namespace poc_locations_service.Controllers
                     UpdatedAt = now
                 };
 
-                _db.Locations.Add(loc);
+                locations.Add(loc);
 
                 if (locReq.Countries is not null)
                 {
                     foreach (var cid in locReq.Countries.Distinct())
                     {
-                        _db.LocationCountries.Add(new LocationCountry
+                        locationCountries.Add(new LocationCountry
                         {
                             LocationId = loc.LocationId,
                             CountryId = cid,
@@ -274,7 +282,7 @@ namespace poc_locations_service.Controllers
                 {
                     foreach (var mid in locReq.Maps.Distinct())
                     {
-                        _db.LocationMaps.Add(new LocationMap
+                        locationMaps.Add(new LocationMap
                         {
                             LocationId = loc.LocationId,
                             MapId = mid,
@@ -287,6 +295,10 @@ namespace poc_locations_service.Controllers
 
                 createdIds.Add(loc.LocationId);
             }
+
+            _db.Locations.AddRange(locations);
+            _db.LocationCountries.AddRange(locationCountries);
+            _db.LocationMaps.AddRange(locationMaps);
 
             await _db.SaveChangesAsync();
             return Ok(new { created_count = createdIds.Count, location_ids = createdIds });
