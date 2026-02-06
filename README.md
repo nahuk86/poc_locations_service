@@ -220,7 +220,46 @@ curl -X GET "https://localhost:7125/v1/locations?map_id=respiratory&country_id=M
 * `GET /v1/admin/locations/ids?status=ACTIVE&limit=5000&offset=0`
 * `GET /v1/admin/locations/{locationId}`
 * `POST /v1/admin/locations`
+* `POST /v1/admin/locations/bulk` - Create multiple locations in a single request
 * `PATCH /v1/admin/locations/{locationId}`
+
+Bulk create payload example:
+
+```json
+{
+  "locations": [
+    {
+      "externalReference": "LOC-001",
+      "name": "Sample Location 1",
+      "addressLine1": "123 Main St",
+      "addressLine2": "Suite 100",
+      "city": "Mexico City",
+      "region": "CDMX",
+      "postalCode": "01000",
+      "latitude": 19.4326,
+      "longitude": -99.1332,
+      "phone": "+52 55 1234 5678",
+      "email": "contact@location1.com",
+      "websiteUrl": "https://location1.com",
+      "hoursText": "Mon-Fri 9AM-5PM",
+      "countries": ["MX"],
+      "maps": ["respiratory"]
+    },
+    {
+      "externalReference": "LOC-002",
+      "name": "Sample Location 2",
+      "addressLine1": "456 Elm Ave",
+      "city": "Guadalajara",
+      "region": "Jalisco",
+      "postalCode": "44100",
+      "latitude": 20.6597,
+      "longitude": -103.3496,
+      "phone": "+52 33 1234 5678",
+      "countries": ["MX"]
+    }
+  ]
+}
+```
 
 ### Admin: Bulk association (relationships)
 
