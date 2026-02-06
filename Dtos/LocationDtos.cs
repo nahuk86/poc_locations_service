@@ -55,4 +55,5 @@
 
     public record BulkUpsertRequest(List<UpsertLocationItem> Items);
 
+    public record BulkCreateLocationsRequest(List<CreateLocationRequest> Locations);
 }

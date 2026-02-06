@@ -222,5 +222,86 @@ namespace poc_locations_service.Controllers
             await _db.SaveChangesAsync();
             return Ok(new { location_id = loc.LocationId, status = loc.Status });
         }
+
+        [HttpPost("bulk")]
+        public async Task<IActionResult> BulkCreate([FromBody] BulkCreateLocationsRequest req)
+        {
+            if (req.Locations == null || req.Locations.Count == 0)
+            {
+                return BadRequest(new { error = "Locations list cannot be empty" });
+            }
+
+            var createdIds = new List<Guid>();
+            var now = DateTime.UtcNow;
+            var locations = new List<Location>();
+            var locationCountries = new List<LocationCountry>();
+            var locationMaps = new List<LocationMap>();
+
+            foreach (var locReq in req.Locations)
+            {
+                var loc = new Location
+                {
+                    LocationId = Guid.NewGuid(),
+                    ExternalReference = locReq.ExternalReference,
+                    Name = locReq.Name,
+                    AddressLine1 = locReq.AddressLine1,
+                    AddressLine2 = locReq.AddressLine2,
+                    City = locReq.City,
+                    Region = locReq.Region,
+                    PostalCode = locReq.PostalCode,
+                    Latitude = locReq.Latitude,
+                    Longitude = locReq.Longitude,
+                    Geom = GeoHelper.ToPoint(locReq.Latitude, locReq.Longitude),
+                    Phone = locReq.Phone,
+                    Email = locReq.Email,
+                    WebsiteUrl = locReq.WebsiteUrl,
+                    HoursText = locReq.HoursText,
+                    Status = RecordStatuses.ACTIVE,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                };
+
+                locations.Add(loc);
+
+                if (locReq.Countries is not null)
+                {
+                    foreach (var cid in locReq.Countries.Distinct())
+                    {
+                        locationCountries.Add(new LocationCountry
+                        {
+                            LocationId = loc.LocationId,
+                            CountryId = cid,
+                            Status = RecordStatuses.ACTIVE,
+                            CreatedAt = now,
+                            UpdatedAt = now
+                        });
+                    }
+                }
+
+                if (locReq.Maps is not null)
+                {
+                    foreach (var mid in locReq.Maps.Distinct())
+                    {
+                        locationMaps.Add(new LocationMap
+                        {
+                            LocationId = loc.LocationId,
+                            MapId = mid,
+                            Status = RecordStatuses.ACTIVE,
+                            CreatedAt = now,
+                            UpdatedAt = now
+                        });
+                    }
+                }
+
+                createdIds.Add(loc.LocationId);
+            }
+
+            _db.Locations.AddRange(locations);
+            _db.LocationCountries.AddRange(locationCountries);
+            _db.LocationMaps.AddRange(locationMaps);
+
+            await _db.SaveChangesAsync();
+            return Ok(new { created_count = createdIds.Count, location_ids = createdIds });
+        }
     }
 }
