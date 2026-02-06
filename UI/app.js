@@ -505,7 +505,7 @@ function validateBulkCreateJson(jsonText) {
   try {
     const parsed = JSON.parse(jsonText);
     if (!Array.isArray(parsed)) {
-      throw new Error("JSON must be an array of location objects");
+      throw new Error("JSON input must be an array of location objects");
     }
     
     for (let i = 0; i < parsed.length; i++) {
@@ -547,11 +547,11 @@ async function runBulkCreate() {
   resultsDiv.style.display = "block";
   
   resultsContent.innerHTML = `
-    <div style="color: var(--accent2); margin-bottom: 10px;">
+    <div class="success-message">
       ✓ Successfully created ${result.created_count} location(s)
     </div>
     <div class="muted">Location IDs:</div>
-    <textarea readonly rows="5" style="width: 100%; background: var(--panel); border: 1px solid var(--line); color: var(--text); padding: 8px; border-radius: 8px; font-family: monospace; font-size: 11px;">${result.location_ids.join('\n')}</textarea>
+    <textarea readonly rows="5" class="result-textarea">${result.location_ids.join('\n')}</textarea>
   `;
   
   log(`✓ Created ${result.created_count} locations`, { location_ids: result.location_ids });
@@ -563,7 +563,7 @@ function initBulkCreate() {
     const resultsDiv = $("bulkCreateResults");
     const resultsContent = $("bulkCreateResultsContent");
     resultsDiv.style.display = "block";
-    resultsContent.innerHTML = `<div style="color: var(--danger);">✗ Error: ${escapeHtml(e.message)}</div>`;
+    resultsContent.innerHTML = `<div class="error-message">✗ Error: ${escapeHtml(e.message)}</div>`;
   }));
 
   $("btnBulkCreateValidate").addEventListener("click", () => {
