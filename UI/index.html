@@ -12,7 +12,7 @@
       <div class="logo">📍</div>
       <div>
         <div class="title">POC Locations Service</div>
-        <div class="subtitle">Admin UI (Maps / Countries / Locations / Bulk / Geo Query)</div>
+        <div class="subtitle">Admin UI (Maps / Countries / Locations / Bulk / Geo Query / Bulk Create)</div>
       </div>
     </div>
 
@@ -35,6 +35,7 @@
       <button class="tab" data-tab="locations">Locations (Admin)</button>
       <button class="tab" data-tab="query">Geo Query (Public)</button>
       <button class="tab" data-tab="bulk">Bulk Associate</button>
+      <button class="tab" data-tab="bulkCreate">Bulk Create</button>
     </nav>
 
     <section class="grid">
@@ -478,6 +479,43 @@
             <div class="muted">
               You can fetch IDs from <code>/v1/admin/locations/ids</code> in the Locations tab, then paste them here.
             </div>
+          </div>
+        </section>
+
+        <!-- Bulk Create -->
+        <section class="tabPanel hidden" id="tab-bulkCreate">
+          <div class="panelHeader">
+            <h2>Bulk Create Locations</h2>
+            <div class="row">
+              <button class="btn" id="btnBulkCreateHelp">Show example JSON</button>
+              <button class="btn" id="btnBulkCreateValidate">Validate JSON</button>
+              <button class="btn primary" id="btnRunBulkCreate">Create Locations</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Locations JSON Array</h3>
+            <div class="form">
+              <label>Paste JSON array of locations to create (see example for format)</label>
+              <textarea id="bulkCreateJson" rows="20" placeholder='[{"name": "Location 1", "addressLine1": "123 Main St", ...}]'></textarea>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Instructions</h3>
+            <div class="muted">
+              <p>Each location object in the array should have the following format:</p>
+              <ul style="margin: 8px 0; padding-left: 20px;">
+                <li><strong>Required:</strong> name, addressLine1, city, latitude, longitude</li>
+                <li><strong>Optional:</strong> externalReference, addressLine2, region, postalCode, phone, email, websiteUrl, hoursText, countries (array), maps (array)</li>
+              </ul>
+              <p>Click "Show example JSON" to see a complete example.</p>
+            </div>
+          </div>
+
+          <div class="card" id="bulkCreateResults" style="display: none;">
+            <h3>Results</h3>
+            <div id="bulkCreateResultsContent"></div>
           </div>
         </section>
 
