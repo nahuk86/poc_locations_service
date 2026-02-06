@@ -500,6 +500,124 @@ function initBulk() {
   });
 }
 
+// ============== Bulk Create Locations ==============
+function validateBulkCreateJson(jsonText) {
+  try {
+    const parsed = JSON.parse(jsonText);
+    if (!Array.isArray(parsed)) {
+      throw new Error("JSON input must be an array of location objects");
+    }
+    
+    for (let i = 0; i < parsed.length; i++) {
+      const loc = parsed[i];
+      if (!loc.name || !loc.addressLine1 || !loc.city) {
+        throw new Error(`Location at index ${i} is missing required fields (name, addressLine1, city)`);
+      }
+      if (loc.latitude === undefined || loc.longitude === undefined) {
+        throw new Error(`Location at index ${i} is missing required coordinates (latitude, longitude)`);
+      }
+      if (typeof loc.latitude !== "number" || typeof loc.longitude !== "number") {
+        throw new Error(`Location at index ${i} has invalid coordinates (must be numbers)`);
+      }
+    }
+    
+    return { valid: true, locations: parsed };
+  } catch (e) {
+    return { valid: false, error: e.message };
+  }
+}
+
+async function runBulkCreate() {
+  const jsonText = $("bulkCreateJson").value.trim();
+  if (!jsonText) {
+    throw new Error("Please provide JSON array of locations");
+  }
+
+  const validation = validateBulkCreateJson(jsonText);
+  if (!validation.valid) {
+    throw new Error(`Invalid JSON: ${validation.error}`);
+  }
+
+  const body = { locations: validation.locations };
+  const result = await apiFetch("/v1/admin/locations/bulk", { method: "POST", body });
+  
+  // Show results
+  const resultsDiv = $("bulkCreateResults");
+  const resultsContent = $("bulkCreateResultsContent");
+  resultsDiv.style.display = "block";
+  
+  resultsContent.innerHTML = `
+    <div class="success-message">
+      ✓ Successfully created ${result.created_count} location(s)
+    </div>
+    <div class="muted">Location IDs:</div>
+    <textarea readonly rows="5" class="result-textarea">${result.location_ids.join('\n')}</textarea>
+  `;
+  
+  log(`✓ Created ${result.created_count} locations`, { location_ids: result.location_ids });
+}
+
+function initBulkCreate() {
+  $("btnRunBulkCreate").addEventListener("click", () => runBulkCreate().catch(e => {
+    log("Bulk create failed", { error: e.message });
+    const resultsDiv = $("bulkCreateResults");
+    const resultsContent = $("bulkCreateResultsContent");
+    resultsDiv.style.display = "block";
+    resultsContent.innerHTML = `<div class="error-message">✗ Error: ${escapeHtml(e.message)}</div>`;
+  }));
+
+  $("btnBulkCreateValidate").addEventListener("click", () => {
+    const jsonText = $("bulkCreateJson").value.trim();
+    if (!jsonText) {
+      log("⚠ No JSON provided");
+      return;
+    }
+    
+    const validation = validateBulkCreateJson(jsonText);
+    if (validation.valid) {
+      log(`✓ JSON is valid. Found ${validation.locations.length} location(s) to create.`);
+    } else {
+      log(`✗ JSON validation failed: ${validation.error}`);
+    }
+  });
+
+  $("btnBulkCreateHelp").addEventListener("click", () => {
+    const example = [
+      {
+        "externalReference": "LOC-001",
+        "name": "Sample Medical Center",
+        "addressLine1": "123 Main Street",
+        "addressLine2": "Suite 100",
+        "city": "Buenos Aires",
+        "region": "CABA",
+        "postalCode": "C1000",
+        "latitude": -34.6037,
+        "longitude": -58.3816,
+        "phone": "+54 11 1234-5678",
+        "email": "contact@samplemedical.com",
+        "websiteUrl": "https://samplemedical.com",
+        "hoursText": "Mon-Fri 09:00-18:00",
+        "countries": ["AR"],
+        "maps": ["respiratory"]
+      },
+      {
+        "externalReference": "LOC-002",
+        "name": "Another Clinic",
+        "addressLine1": "456 Oak Avenue",
+        "city": "Córdoba",
+        "region": "Córdoba",
+        "postalCode": "X5000",
+        "latitude": -31.4201,
+        "longitude": -64.1888,
+        "countries": ["AR"],
+        "maps": ["respiratory", "covid"]
+      }
+    ];
+    $("bulkCreateJson").value = JSON.stringify(example, null, 2);
+    log("Example JSON loaded into textarea");
+  });
+}
+
 // ============== HTML escaping ==============
 function escapeHtml(str) {
   return String(str ?? "")
@@ -519,6 +637,7 @@ function escapeHtml(str) {
   initLocations();
   initQuery();
   initBulk();
+  initBulkCreate();
 
   log("UI ready. Set API Base URL and run /v1/db-ping.");
 })();

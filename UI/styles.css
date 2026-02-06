@@ -219,3 +219,21 @@ body{
   overflow:auto;
 }
 code{ color:#dbeafe; }
+
+.success-message{
+  color:var(--accent2);
+  margin-bottom:10px;
+}
+.error-message{
+  color:var(--danger);
+}
+.result-textarea{
+  width:100%;
+  background:var(--panel);
+  border:1px solid var(--line);
+  color:var(--text);
+  padding:8px;
+  border-radius:8px;
+  font-family:monospace;
+  font-size:11px;
+}
